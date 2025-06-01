@@ -1,17 +1,45 @@
-from data_processing import load_data, preprocess_data
+from data_processing import split_data, create_data_pipeline, save_pipeline, encode_response_variable
 from ml_functions import train_model, evaluate_model
-from helper_function import setup_logger
+from helper_function import setup_logger, log_error, log_info
+import pandas as pd
 
-def run_pipeline(filepath=r"C:/Users/crdik/OneDrive/Desktop/mlops_project/Data/data.csv"):
-    setup_logger()
+def load_data(filepath):
+    try:
+        # FIXED: Added sep=';' to support semicolon-delimited CSV
+        df = pd.read_csv(filepath, sep=';')
+        log_info(f"Data loaded successfully from {filepath}")
+        return df
+    except Exception as e:
+        log_error(f"Failed to load data: {str(e)}")
+        raise
 
-    df = load_data(filepath)
+def preprocess_data(X):
+    pipeline = create_data_pipeline(X)
+    if pipeline is None:
+        raise ValueError("Pipeline creation failed.")
+    
+    pipeline.fit(X)
+    save_pipeline(pipeline)
 
-    # Assuming last column is the target
-    X = preprocess_data(df.iloc[:, :-1])
-    y = df.iloc[:, -1]
+    return pipeline.transform(X)
 
-    model, accuracy = train_model(X, y)
-    report = evaluate_model(model, X, y)
+def run_pipeline(filepath):
+    try:
+        setup_logger()
 
-    return accuracy, report
+        df = load_data(filepath)
+        X_raw = df.iloc[:, :-1]
+        y_raw = df.iloc[:, -1]
+
+        X_processed = preprocess_data(X_raw)
+        y_encoded = encode_response_variable(y_raw)
+
+        X_train, X_test, y_train, y_test = split_data(X_processed, y_encoded)
+        model, accuracy = train_model(X_train, y_train)
+        report = evaluate_model(model, X_test, y_test)
+
+        return accuracy, report
+
+    except Exception as e:
+        log_error(f"Pipeline execution failed: {str(e)}")
+        raise

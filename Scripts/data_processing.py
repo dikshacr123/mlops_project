@@ -9,24 +9,38 @@ from sklearn.model_selection import train_test_split
 from dotenv import load_dotenv
 from helper_function import log_info, log_error
 
-# Load environment variables
+# Load environment variables from .env
 load_dotenv()
 
 # Define base paths dynamically
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_PATH = os.path.join(BASE_DIR, 'Data', 'data.csv')
 ARTIFACTS_DIR = os.path.join(BASE_DIR, os.getenv('ARTIFACTS_DIR', 'Artifacts'))
 
 # Ensure Artifacts directory exists
 os.makedirs(ARTIFACTS_DIR, exist_ok=True)
 
-# Define paths for pipeline and label encoder
+# Paths to save models/artifacts
 PIPELINE_PATH = os.path.join(ARTIFACTS_DIR, "data_processing_pipeline.pkl")
 LABEL_ENCODER_PATH = os.path.join(ARTIFACTS_DIR, "label_encoder.pkl")
 
 
+def load_data():
+    """
+    Loads data from the data.csv file located in the Data directory.
+    """
+    try:
+        data = pd.read_csv(DATA_PATH)
+        log_info(f"Data loaded successfully from {DATA_PATH}")
+        return data
+    except Exception as e:
+        log_error(f"Failed to load data: {str(e)}")
+        return None
+
+
 def create_data_pipeline(data):
     """
-    Creates a preprocessing pipeline with OneHotEncoder for categorical features
+    Creates a preprocessing pipeline using OneHotEncoder for categorical features
     and MinMaxScaler for numerical features.
     """
     try:

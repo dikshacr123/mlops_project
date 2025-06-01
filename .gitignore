@@ -172,3 +172,13 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+
+# Ignore MLflow trash and run logs
+mlruns/.trash/
+mlruns/**/meta.yaml
+mlruns/**/mlflow* 
+mlruns/**/params
+mlruns/**/metrics
+mlruns/**/tags
+mlruns/**/artifacts/
