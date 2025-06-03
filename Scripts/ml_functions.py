@@ -71,9 +71,20 @@ def train_model(X_train, y_train):
 
         return best_model, accuracy
 
+from helper_function import log_info  # Make sure this is already imported
+
 def evaluate_model(model, X_test, y_test):
-    logging.info("Evaluating model")
+    logging.info("Evaluating model...")
     y_pred = model.predict(X_test)
-    acc = accuracy_score(y_test, y_pred)
-    report = classification_report(y_test, y_pred, output_dict=True)
-    return acc, report
+
+    # Accuracy
+    accuracy = accuracy_score(y_test, y_pred)
+
+    # Classification Report (dict and readable)
+    report_dict = classification_report(y_test, y_pred, output_dict=True)
+    report_str = classification_report(y_test, y_pred)
+
+    # Log it using your helper function
+    log_info("Classification Report:\n" + report_str)
+
+    return accuracy, report_dict
