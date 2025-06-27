@@ -5,35 +5,25 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-# Define base paths
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.abspath(os.path.join(CURRENT_DIR, ".."))
 LOGS_DIR = os.path.join(BASE_DIR, os.getenv('LOGS_DIR', 'logs'))
 
-# Ensure Logs directory exists
 os.makedirs(LOGS_DIR, exist_ok=True)
-
-# Define log file path
 LOG_FILE = os.path.join(LOGS_DIR, "output.log")
 
 def setup_logger():
-    """
-    Configures logging to file if not already set up.
-    Prevents duplicate handlers (important for Streamlit).
-    """
     logger = logging.getLogger()
     if not logger.hasHandlers():
         logger.setLevel(logging.INFO)
-        
-        # File handler
+
         file_handler = logging.FileHandler(LOG_FILE)
         file_handler.setFormatter(logging.Formatter(
             '%(asctime)s - %(levelname)s - %(message)s',
             datefmt='%Y-%m-%d %H:%M:%S'
         ))
         logger.addHandler(file_handler)
-        
-        # Optional: also log to console/Streamlit terminal
+
         stream_handler = logging.StreamHandler()
         stream_handler.setFormatter(logging.Formatter('%(levelname)s - %(message)s'))
         logger.addHandler(stream_handler)

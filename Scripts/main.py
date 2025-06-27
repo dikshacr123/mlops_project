@@ -1,33 +1,23 @@
-from data_processing import split_data, create_data_pipeline, save_pipeline, encode_response_variable
-from ml_functions import train_model, evaluate_model
-from helper_function import setup_logger, log_error, log_info
-import pandas as pd
+from helper_function import setup_logger, log_info, log_error
+setup_logger()
 
-def load_data(filepath):
-    try:
-        # FIXED: Added sep=';' to support semicolon-delimited CSV
-        df = pd.read_csv(filepath, sep=';')
-        log_info(f"Data loaded successfully from {filepath}")
-        return df
-    except Exception as e:
-        log_error(f"Failed to load data: {str(e)}")
-        raise
+from data_processing import create_data_pipeline, save_pipeline, encode_response_variable, split_data
+from ml_functions import train_model, evaluate_model
+import pandas as pd
 
 def preprocess_data(X):
     pipeline = create_data_pipeline(X)
     if pipeline is None:
         raise ValueError("Pipeline creation failed.")
-    
     pipeline.fit(X)
     save_pipeline(pipeline)
-
     return pipeline.transform(X)
 
 def run_pipeline(filepath):
     try:
-        setup_logger()
+        df = pd.read_csv(filepath, sep=';')
+        log_info("CSV read into DataFrame.")
 
-        df = load_data(filepath)
         X_raw = df.iloc[:, :-1]
         y_raw = df.iloc[:, -1]
 
@@ -38,8 +28,11 @@ def run_pipeline(filepath):
         model, accuracy = train_model(X_train, y_train)
         report = evaluate_model(model, X_test, y_test)
 
-        return accuracy, report
-
+        log_info(f"Pipeline completed. Accuracy: {accuracy}")
+        return model,accuracy, report
     except Exception as e:
         log_error(f"Pipeline execution failed: {str(e)}")
         raise
+
+if __name__ == "__main__":
+    run_pipeline("Data\data.csv")
